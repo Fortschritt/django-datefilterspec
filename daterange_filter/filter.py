@@ -5,14 +5,18 @@
 Has the filter that allows to filter by a date range.
 
 '''
-import copy
 import datetime
 import django
 from django import forms
 from django.contrib import admin
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.contrib.admin.templatetags.admin_static import static
+try:
+    # Django 2.2-
+    from django.contrib.admin.templatetags.admin_static import static
+except ImportError:
+    # Django 3.2+
+    from django.contrib.admin import static
 from django.conf import settings
 
 use_suit = 'DATE_RANGE_FILTER_USE_WIDGET_SUIT'
@@ -157,11 +161,10 @@ class DateRangeFilter(admin.filters.FieldListFilter):
         parameters.
         """
         
-        hidden_params = copy.deepcopy(cl.params)
-        hidden_params.pop(self.lookup_kwarg_since, None)
-        hidden_params.pop(self.lookup_kwarg_upto, None)
+        cl.params.pop(self.lookup_kwarg_since, None)
+        cl.params.pop(self.lookup_kwarg_upto, None)
         return ({
-            'get_query': hidden_params,
+            'get_query': cl.params,
         }, )
 
     def expected_parameters(self):
